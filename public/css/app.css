@@ -28,7 +28,8 @@ a:hover {
   font-weight: bold;
 }
 
-a:active {
+a:active,
+.search-button:active {
   transform: translateY(4px);
 }
 
@@ -38,8 +39,34 @@ a:active {
   position: absolute;
 }
 
+.search-stock {
+  font-family: "Open Sans", sans-serif;
+  width: 50%;
+  padding-bottom: 30px;
+  position: relative;
+  margin: auto;
+}
+
 .search-button {
   margin-left: 3px;
+  list-style-type: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #ebebeb;
+  min-width: 30px;
+  font-size: 20px;
+  background: none;
+  border: none;
+}
+
+.search-button:hover {
+  background-image: url("https://scottyzen.sirv.com/Images/v/button.png");
+  background-size: 100% 100%;
+  color: #27262c;
+  -webkit-animation: spring 300ms ease-out;
+          animation: spring 300ms ease-out;
+  text-shadow: 0 -1px 0 #ffeba7;
+  font-weight: bold;
 }
 
 body {

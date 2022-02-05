@@ -11201,7 +11201,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\ntable[data-v-8e1e20aa] {\n    font-family: 'Open Sans', sans-serif;\n    width: 750px !important;\n    border-collapse: collapse;\n    border: 3px solid #44475C;\n    margin: 20px 10px 0 3px;\n    padding-left: 30px;\n}\ntable th[data-v-8e1e20aa] {\n    text-transform: uppercase;\n    text-align: center;\n    background: #44475C;\n    color: #FFF;\n    padding: 3px;\n    min-width: 100px;\n    border: 2px solid #7D82A8;\n}\ntable td[data-v-8e1e20aa] {\n    text-align: center;\n    padding: 8px;\n    border-right: 2px solid #7D82A8;\n    border-bottom: 2px solid #7D82A8;\n}\ntable td[data-v-8e1e20aa]:last-child {\n    border-right: none;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.stocks-table[data-v-8e1e20aa] {\n    font-family: 'Open Sans', sans-serif;\n    width: 750px !important;\n    border-collapse: collapse;\n    border: 3px solid #44475C;\n    padding-left: 30px;\n    position:relative;\n    margin:auto;\n}\n.stocks-table th[data-v-8e1e20aa] {\n    text-transform: uppercase;\n    text-align: center;\n    background: #44475C;\n    color: #FFF;\n    padding: 3px;\n    min-width: 100px;\n    border: 2px solid #7D82A8;\n}\n.stocks-table td[data-v-8e1e20aa] {\n    text-align: center;\n    padding: 8px;\n    border-right: 2px solid #7D82A8;\n    border-bottom: 2px solid #7D82A8;\n}\n.stocks-table td[data-v-8e1e20aa]:last-child {\n    border-right: none;\n}\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -29218,7 +29218,7 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("table", [
+  return _c("table", { staticClass: "stocks-table" }, [
     _c("thead", [
       _c(
         "tr",

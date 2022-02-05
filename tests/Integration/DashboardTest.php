@@ -29,13 +29,12 @@ class DashboardTest extends TestCase
         $user = UserFactory::new()->create();
         $response = $this->actingAs($user)->post('/stock', [
             'stock' => 'notvalied',
+            'error' => 'Didn\'t find stock.'
         ]);
 
-        $response->assertStatus(302)
-            ->assertRedirect('/');
-
-        $response->assertSessionHas('error', 'Didn\'t find the stock: ');
-        $this->assertTrue(session()->hasOldInput('stock'));
+        $response->assertStatus(200);
+        $content = $response->getOriginalContent()->getData()['stock'];
+        $this->assertEquals('notvalied', $content);
     }
 
     public function testMissingInput(): void

@@ -25,7 +25,8 @@ a:hover{
     font-weight: bold;
 }
 
-a:active{
+a:active,
+.search-button:active{
     transform: translateY(4px);
 }
 
@@ -34,19 +35,33 @@ a:active{
     right: 0;
     position: absolute;
 }
-//
-//form{
-//    position: relative;
-//    top: 50%;
-//    left: 50%;
-//    transform: translate(-50%,-50%);
-//    transition: all 1s;
-//    width: 50px;
-//    height: 40px;
-//    display: inline-flex;
-//}
+
+.search-stock {
+    font-family: 'Open Sans', sans-serif;
+    width: 50%;
+    padding-bottom: 30px;
+    position:relative;
+    margin:auto;
+}
 
 .search-button {
     margin-left: 3px;
+    list-style-type: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #ebebeb;
+    min-width: 30px;
+    font-size: 20px;
+    background:none;
+    border:none;
+}
+
+.search-button:hover{
+    background-image: url('https://scottyzen.sirv.com/Images/v/button.png');
+    background-size: 100% 100%;
+    color: $button-text-color;
+    animation: spring 300ms ease-out;
+    text-shadow: 0 -1px 0 $button-color;
+    font-weight: bold;
 }
 

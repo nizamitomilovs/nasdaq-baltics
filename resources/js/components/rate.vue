@@ -1,5 +1,5 @@
 <template>
-    <table>
+    <table class="stocks-table">
         <thead>
         <tr>
             <th v-for="col in columnNames">{{ col.replace(/_/g, ' ') }}</th>
@@ -60,16 +60,17 @@ export default {
 </script>
 
 <style scoped>
-table {
+.stocks-table {
     font-family: 'Open Sans', sans-serif;
     width: 750px !important;
     border-collapse: collapse;
     border: 3px solid #44475C;
-    margin: 20px 10px 0 3px;
     padding-left: 30px;
+    position:relative;
+    margin:auto;
 }
 
-table th {
+.stocks-table th {
     text-transform: uppercase;
     text-align: center;
     background: #44475C;
@@ -79,14 +80,14 @@ table th {
     border: 2px solid #7D82A8;
 }
 
-table td {
+.stocks-table td {
     text-align: center;
     padding: 8px;
     border-right: 2px solid #7D82A8;
     border-bottom: 2px solid #7D82A8;
 }
 
-table td:last-child {
+.stocks-table td:last-child {
     border-right: none;
 }
 </style>

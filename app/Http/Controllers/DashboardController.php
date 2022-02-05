@@ -38,9 +38,7 @@ class DashboardController extends Controller
 
         $stock = $this->stockRepository->findStock($payload['stock']);
         if (null === $stock) {
-            return redirect('/')
-                ->with('error', 'Didn\'t find the stock: ')
-                ->withInput(['stock' => $payload['stock']]);
+            return view('dashboard', ['error' => 'Didn\'t find stock: ', 'stock' => $payload['stock']]);
         }
 
         $stockPrices = $this->stockRepository->findStockPrices($stock);
