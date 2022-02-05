@@ -31,7 +31,8 @@ class RegisterController extends Controller
         } catch (ValidationException | EntityAlreadyExistsException $e) {
             return redirect('/login')
                 ->with('message', $e->getMessage())
-                ->withInput(['email' => $request::input('email')]);
+                ->with('register', false)
+                ->withInput(['email' => $request::input('email'), 'register' => false]);
         }
 
         auth()->login($user);
