@@ -12,7 +12,7 @@ class UserRepository implements UserRepositoryInterface
 {
     public function create(array $userData): User
     {
-        $user = User::where('email', $userData['email']);
+        $user = User::where('email', $userData['email'])->first();
 
         if (null !== $user) {
             throw EntityAlreadyExistsException::isInDatabases('User');

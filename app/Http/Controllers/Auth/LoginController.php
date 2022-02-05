@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Validation\Validator as ContractValidation;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class LoginController
+class LoginController extends Controller
 {
     public function show()
     {
@@ -34,7 +35,6 @@ class LoginController
                     'email' => $userData['email']
                 ]);
         }
-
 
         return redirect()->to('/');
     }

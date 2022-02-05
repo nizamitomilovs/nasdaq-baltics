@@ -33,8 +33,7 @@ class LoginTest extends TestCase
         ]);
 
         $response->assertStatus(302)
-            ->assertRedirect('/login')
-            ->assertSessionHasErrors();
+            ->assertRedirect('/login');
 
         $this->assertTrue(session()->hasOldInput('email'));
         $this->assertFalse(session()->hasOldInput('password'));

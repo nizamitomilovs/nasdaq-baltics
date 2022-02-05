@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Repositories\Exceptions\EntityAlreadyExistsException;
 use App\Repositories\UserRepository\UserRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
@@ -23,34 +24,21 @@ class RegisterController extends Controller
         $this->userRepository = $userRepository;
     }
 
-    public function register(Request $request)
+    public function register(Request $request): RedirectResponse
     {
         try {
             $validator = $this->validator($request::all());
             $payload = $validator->validate();
-        } catch (ValidationException $e) {
-            return view('welcome');
+            $user = $this->userRepository->create($payload);
+        } catch (ValidationException | EntityAlreadyExistsException $e) {
+            return redirect('/login')
+                ->with('message', $e->getMessage())
+                ->withInput(['email' => $request::input('email')]);
         }
-
-
-        $user = $this->userRepository->create($payload);
-
 
         auth()->login($user);
 
         return redirect()->route('dashboard');
-    }
-
-    /**
-     * @param array<string, string> $payload
-     */
-    private function createUser(array $payload): User
-    {
-        return User::create([
-            'name' => $payload['name'],
-            'email' => $payload['email'],
-            'password' => Hash::make($payload['password']),
-        ]);
     }
 
     /**

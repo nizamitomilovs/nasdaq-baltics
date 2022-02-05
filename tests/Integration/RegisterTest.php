@@ -22,7 +22,6 @@ class RegisterTest extends TestCase
         ]);
 
         $response->assertStatus(302)
-            ->assertSessionHasErrors()
             ->assertRedirect('/login');
     }
 
@@ -40,7 +39,6 @@ class RegisterTest extends TestCase
         ]);
 
         $response->assertStatus(302)
-            ->assertSessionHasErrors()
             ->assertRedirect('/login');
 
         $this->assertTrue(session()->hasOldInput('email'));
