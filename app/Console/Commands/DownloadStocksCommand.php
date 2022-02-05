@@ -2,9 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Date;
-use App\Models\Stock;
-use App\Models\StockPrice;
 use App\Repositories\StockRepository\StockRepositoryInterface;
 use App\Services\ApiService\ApiClientInterface;
 use Carbon\Carbon;
@@ -59,6 +56,7 @@ class DownloadStocksCommand extends Command
             //just continue
         }
 
+        //will throw exception, if can't download file
         $this->apiClient->downloadStocks($this->date);
 
         $stockPrices = [];
@@ -87,7 +85,7 @@ class DownloadStocksCommand extends Command
         $sheet = $book->getActiveSheet();
 
         if (3 > $sheet->getHighestRow()) {
-            throw new RuntimeException('Didn\'t find any stocks in the file.');
+            throw new RuntimeException('Didn\'t find any stocks in the file for date: ' . $this->date->format('Y-m-d'));
         }
 
         $this->checkAndSaveStockNames($sheet);

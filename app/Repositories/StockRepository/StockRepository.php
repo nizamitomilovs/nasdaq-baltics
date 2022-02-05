@@ -8,6 +8,7 @@ use App\Models\Date;
 use App\Models\Stock;
 use App\Models\StockPrice;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 class StockRepository implements StockRepositoryInterface
 {
@@ -45,5 +46,19 @@ class StockRepository implements StockRepositoryInterface
     public function stockPricesCreate(array $stockPrices): void
     {
         StockPrice::insert($stockPrices);
+    }
+
+    public function findStock(string $stock): ?Stock
+    {
+        $stock = Stock::where('ticker', strtoupper($stock))
+            ->orWhere('name', $stock)
+            ->first();
+
+        return $stock ?? null;
+    }
+
+    public function findStockPrices(Stock $stock): Collection
+    {
+        return StockPrice::where('stock_id', $stock->ticker)->get();
     }
 }

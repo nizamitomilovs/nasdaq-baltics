@@ -6,10 +6,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Stock;
 use App\Models\StockPrice;
-use Illuminate\Http\Request;
+use App\Repositories\StockRepository\StockRepositoryInterface;
+use Illuminate\Contracts\Validation\Validator as ContractValidation;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class DashboardController extends Controller
 {
+    private StockRepositoryInterface $stockRepository;
+
+    public function __construct(StockRepositoryInterface $stockRepository)
+    {
+        $this->stockRepository = $stockRepository;
+    }
+
     public function index()
     {
         return view('dashboard');
@@ -17,12 +28,33 @@ class DashboardController extends Controller
 
     public function showStock(Request $request)
     {
-        $stock = $request->get('stock');
+        try {
+            $validator = $this->validator($request::all());
+            $payload = $validator->validate();
+        } catch (ValidationException $e) {
+            return redirect('/')
+                ->with('error', $e->errors());
+        }
 
-        $stock = Stock::where('ticker', strtoupper($stock))->first();
+        $stock = $this->stockRepository->findStock($payload['stock']);
+        if (null === $stock) {
+            return redirect('/')
+                ->with('error', 'Didn\'t find the stock: ')
+                ->withInput(['stock' => $payload['stock']]);
+        }
 
-        $stockPrices = StockPrice::where('stock_id', $stock->ticker)->get();
+        $stockPrices = $this->stockRepository->findStockPrices($stock);
 
         return view('dashboard', ['stockPrices' => $stockPrices->toJson()]);
+    }
+
+    /**
+     * @param array<string, string> $data
+     */
+    protected function validator(array $data): ContractValidation
+    {
+        return Validator::make($data, [
+            'stock' => ['required', 'string', 'max:255'],
+        ]);
     }
 }

@@ -7,7 +7,7 @@ namespace App\Repositories\StockRepository;
 use App\Models\Date;
 use App\Models\Stock;
 use DateTimeInterface;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Illuminate\Database\Eloquent\Collection;
 
 interface StockRepositoryInterface
 {
@@ -23,4 +23,8 @@ interface StockRepositoryInterface
      * @param array<string, string|DateTimeInterface> $stockPrices
      */
     public function stockPricesCreate(array $stockPrices): void;
+
+    public function findStock(string $stock): ?Stock;
+
+    public function findStockPrices(Stock $stock): Collection;
 }
