@@ -19,3 +19,12 @@ To start application use
 
 #### Running tests
 - > vendor/bin/phpunit
+
+
+## Command usage
+
+There is one command which can be used from the terminal. Command is responsible for pulling and saving in database stock prices for specific date.<br>
+
+- >php artisan download:stocks 2022-01-02
+  > 
+Where date is optional parameter, if no date is specified, command will use current date.
