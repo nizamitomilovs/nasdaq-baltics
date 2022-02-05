@@ -25,7 +25,7 @@ class RegisterTest extends TestCase
             ->assertRedirect('/login');
     }
 
-    public function testRegisterWhenEmailIsUser(): void
+    public function testRegisterWhenEmailIsUsed(): void
     {
         $user = UserFactory::new()->create([
             'email' => 'testing@gmail.com',
@@ -56,6 +56,8 @@ class RegisterTest extends TestCase
 
         $response->assertStatus(302);
         $response->assertRedirect('/');
+
+        $this->assertAuthenticated();
 
         $this->assertDatabaseHas('users', [
             'email' => 'test@gmail.com',
