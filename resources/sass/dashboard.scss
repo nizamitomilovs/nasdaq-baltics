@@ -1,0 +1,52 @@
+nav {
+    margin-left: 20px;
+}
+a {
+    margin-top: 10px;
+    display: flex;
+    left: 0;
+    list-style-type: none;
+}
+
+a{
+    padding: 1rem 2rem 1.15rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #ebebeb;
+    min-width: 80px;
+}
+
+a:hover{
+    background-image: url('https://scottyzen.sirv.com/Images/v/button.png');
+    background-size: 100% 100%;
+    color: $button-text-color;
+    animation: spring 300ms ease-out;
+    text-shadow: 0 -1px 0 $button-color;
+    font-weight: bold;
+}
+
+a:active{
+    transform: translateY(4px);
+}
+
+.logout {
+    float: right !important;
+    right: 0;
+    position: absolute;
+}
+//
+//form{
+//    position: relative;
+//    top: 50%;
+//    left: 50%;
+//    transform: translate(-50%,-50%);
+//    transition: all 1s;
+//    width: 50px;
+//    height: 40px;
+//    display: inline-flex;
+//}
+
+.search-button {
+    margin-left: 3px;
+}
+
