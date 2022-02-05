@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\DateFactory;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class Date extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'processed_dates';
 
@@ -31,4 +34,9 @@ class Date extends Model
     protected $casts = [
         'date' => 'datetime',
     ];
+
+    protected static function newFactory(): Factory
+    {
+        return DateFactory::new();
+    }
 }
