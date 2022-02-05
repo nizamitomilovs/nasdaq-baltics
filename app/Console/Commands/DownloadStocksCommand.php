@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Repositories\StockRepository\StockRepositoryInterface;
 use App\Services\ApiService\ApiClientInterface;
 use Carbon\Carbon;
+use DateTime;
 use DateTimeInterface;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -15,6 +16,7 @@ use RuntimeException;
 class DownloadStocksCommand extends Command
 {
     public const FILE_NAME = 'storage/stocks.xlsx';
+
     /**
      * @var string
      */
@@ -41,9 +43,9 @@ class DownloadStocksCommand extends Command
 
     public function handle(): int
     {
-        $this->date = Carbon::createFromFormat('Y-m-d', $this->argument('date'));
+        $this->date = date_create($this->argument('date'));
         if (null === $this->date) {
-            $this->date = Carbon::createFromFormat('Y-m-d', Carbon::now());
+            $this->date = date_create();
             $this->info('No date were specified, using today\'s day: ' . $this->date->format('Y-m-d'));
         }
 
@@ -57,7 +59,7 @@ class DownloadStocksCommand extends Command
         }
 
         //will throw exception, if can't download file
-        $this->apiClient->downloadStocks($this->date);
+        $this->apiClient->downloadStocks($this->date->format('Y-m-d'));
 
         $stockPrices = [];
         $this->processFile(
