@@ -45,7 +45,7 @@ class DownloadStocksCommand extends Command
         $inputDate = $this->argument('date');
         if (null !== $inputDate && DateTime::createFromFormat('Y-m-d', $inputDate) == false) {
             //check for valid date format
-            $this->info('Please provide valid data format 2022-01-05.');
+            $this->error('Please provide valid data format 2022-01-05.');
             return 1;
         } elseif (null === $inputDate) {
             //if not date specified will use current date
