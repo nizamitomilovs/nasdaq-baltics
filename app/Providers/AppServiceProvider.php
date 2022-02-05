@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Repositories\StockRepository\StockRepository;
+use App\Repositories\StockRepository\StockRepositoryInterface;
 use App\Repositories\UserRepository\UserRepository;
 use App\Repositories\UserRepository\UserRepositoryInterface;
 use App\Services\ApiService\ApiClient;
@@ -18,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(ClientInterface::class, GuzzleClient::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
 
 
         $this->app->bind(ApiClientInterface::class, function ($app) {

@@ -5,16 +5,19 @@ namespace App\Console\Commands;
 use App\Models\Date;
 use App\Models\Stock;
 use App\Models\StockPrice;
+use App\Repositories\StockRepository\StockRepositoryInterface;
 use App\Services\ApiService\ApiClientInterface;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use RuntimeException;
 
 class DownloadStocksCommand extends Command
 {
+    private const FILE_NAME = 'storage/stocks.xlsx';
     /**
      * @var string
      */
@@ -26,14 +29,16 @@ class DownloadStocksCommand extends Command
     protected $description = 'Download stock prices from nasdaq baltics.';
 
     private ApiClientInterface $apiClient;
+    private StockRepositoryInterface $stockRepository;
     private Xlsx $xlsReader;
     private ?DateTimeInterface $date;
 
-    public function __construct(ApiClientInterface $apiClient, Xlsx $xlsReader)
+    public function __construct(ApiClientInterface $apiClient, Xlsx $xlsReader, StockRepositoryInterface $stockRepository)
     {
         parent::__construct();
 
         $this->apiClient = $apiClient;
+        $this->stockRepository = $stockRepository;
         $this->xlsReader = $xlsReader;
     }
 
@@ -46,94 +51,98 @@ class DownloadStocksCommand extends Command
         }
 
         try {
-            if (Date::where('date', $this->date->format('Y-m-d'))->firstOrFail()) {
+            if ($this->stockRepository->getDate($this->date)) {
+                $this->info('This date was already downloaded: ' . $this->date->format('Y-m-d'));
                 return 1;
             }
         } catch (ModelNotFoundException $e) {
-            Date::create([
-                'id_hash' => mb_substr(md5(uniqid('', true)), 0, 28),
-                'date' => $this->date
-            ]);
+            //just continue
         }
 
         $this->apiClient->downloadStocks($this->date);
 
-        $this->processFile('storage/stocks.xlsx');
+        $stockPrices = [];
+        $this->processFile(
+            static function (array $row) use (&$stockPrices) {
+                $stockPrices[] = $row;
+            });
 
-        unlink('storage/stocks.xlsx');
+        $this->stockRepository->stockPricesCreate($stockPrices);
+
+        //when processed save date
+        $this->stockRepository->createDate($this->date);
+
+        unlink(self::FILE_NAME);
 
         return 1;
     }
 
-    private
-    function processFile(string $fileName): void
+    private function processFile(callable $operation): void
     {
-        if (!$this->xlsReader->canRead($fileName)) {
+        if (!$this->xlsReader->canRead(self::FILE_NAME)) {
             throw new RuntimeException('Cannot read the input file');
         }
-        $book = $this->xlsReader->load($fileName);
+        $book = $this->xlsReader->load(self::FILE_NAME);
         $sheet = $book->getActiveSheet();
 
+        $this->checkAndSaveStockNames($sheet);
+
+
+        for ($row = 2; $row <= $sheet->getHighestRow(); $row++) {
+            $operation($this->convertStockPriceRows($sheet, $row));
+        }
+    }
+
+    private function checkAndSaveStockNames(Worksheet $sheet): void
+    {
         $stockNames = [];
         $stockTickers = [];
-        $rowCounter = 0;
-        foreach ($sheet->getColumnIterator() as $column) {
-            foreach ($column->getCellIterator(2) as $cell) {
-                if ($rowCounter === 0) {
-                    $stockTickers[] = $cell->getValue();
-                } elseif ($rowCounter === 1) {
-                    $stockNames[] = $cell->getValue();
-                }
-            }
-            $rowCounter++;
 
-            if ($rowCounter > 1) {
-                break;
-            }
+        for ($row = 2; $row <= $sheet->getHighestRow(); $row++) {
+            $stockTickers[] = $sheet->getCellByColumnAndRow(1, $row)->getValue();
+            $stockNames[] = $sheet->getCellByColumnAndRow(2, $row)->getValue();
         }
 
         $stocks = array_combine($stockTickers, $stockNames);
-
-        $savedStocks = Stock::whereIn('ticker', $stockTickers)->get()->toArray();
+        $savedStocks = $this->stockRepository->getStocks($stockTickers);
 
         if (count($savedStocks) !== count($stockTickers)) {
             foreach ($stocks as $stockTicker => $stockName) {
                 if (false === array_search($stockTicker, array_column($savedStocks, 'ticker'))) {
-                    Stock::create([
-                        'id_hash' => mb_substr(md5(uniqid('', true)), 0, 28),
-                        'ticker' => $stockTicker,
-                        'name' => $stockName
-                    ]);
+                   $this->stockRepository->createStock($stockTicker, $stockName);
                 }
             }
         }
+    }
 
-        $rows = $sheet->toArray();
-        array_shift($rows);
-        foreach ($rows as $row) {
-            StockPrice::create([
-                'id_hash' => mb_substr(md5(uniqid('', true)), 0, 28),
-                'stock_id' => $row[0],
-                'price_date' => $this->date,
-                'isin' => $row[2],
-                'currency' => $row[3],
-                'market_place' => $row[4],
-                'list_segment' => $row[5],
-                'average_price' => $row[6],
-                'open_price' => $row[7],
-                'high_price' => $row[8],
-                'low_price' => $row[9],
-                'last_close_price' => $row[10],
-                'last_price' => $row[11],
-                'price_change' => $row[12],
-                'best_bid' => $row[13],
-                'best_ask' => $row[14],
-                'trades' => $row[15],
-                'volume' => $row[16],
-                'turnover' => $row[17],
-                'industry' => $row[18],
-                'supersector' => $row[19]
-            ]);
-        }
+    /**
+     * @return array<string, string>
+     */
+    private function convertStockPriceRows(Worksheet $sheet, int $row): array
+    {
+        return [
+            'id_hash' => mb_substr(md5(uniqid('', true)), 0, 28),
+            'stock_id' => (string)$sheet->getCell('A' . $row)->getValue(),
+            'name' => (string)$sheet->getCell('B' . $row)->getValue(),
+            'price_date' => $this->date,
+            'isin' => (string)$sheet->getCell('C' . $row)->getValue(),
+            'currency' => (string)$sheet->getCell('D' . $row)->getValue(),
+            'market_place' => (string)$sheet->getCell('E' . $row)->getValue(),
+            'list_segment' => (string)$sheet->getCell('F' . $row)->getValue(),
+            'average_price' => (string)$sheet->getCell('G' . $row)->getValue(),
+            'open_price' => (string)$sheet->getCell('H' . $row)->getValue(),
+            'high_price' => (string)$sheet->getCell('I' . $row)->getValue(),
+            'low_price' => (string)$sheet->getCell('J' . $row)->getValue(),
+            'last_close_price' => (string)$sheet->getCell('K' . $row)->getValue(),
+            'last_price' => (string)$sheet->getCell('L' . $row)->getValue(),
+            'price_change' => (string)$sheet->getCell('M' . $row)->getValue(),
+            'best_bid' => (string)$sheet->getCell('N' . $row)->getValue(),
+            'best_ask' => (string)$sheet->getCell('O' . $row)->getValue(),
+            'trades' => (string)$sheet->getCell('P' . $row)->getValue(),
+            'volume' => (string)$sheet->getCell('Q' . $row)->getValue(),
+            'turnover' => (string)$sheet->getCell('R' . $row)->getValue(),
+            'industry' => (string)$sheet->getCell('S' . $row)->getValue(),
+            'supersector' => (string)$sheet->getCell('T' . $row)->getValue(),
+        ];
     }
 }

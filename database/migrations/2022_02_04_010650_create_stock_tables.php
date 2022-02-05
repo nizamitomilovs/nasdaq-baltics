@@ -22,8 +22,9 @@ class CreateStockTables extends Migration
             $table->bigIncrements('id');
             $table->string('id_hash')->unique();
             $table->string('stock_id');
+            $table->string('name');
             $table->foreign('stock_id')->references('ticker')->on('stocks')->onDelete('cascade');
-            $table->string('price_date');
+            $table->date('price_date');
             $table->string('isin');
             $table->string('currency');
             $table->string('market_place')->nullable();
