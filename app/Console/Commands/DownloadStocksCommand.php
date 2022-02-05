@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Repositories\StockRepository\StockRepositoryInterface;
 use App\Services\ApiService\ApiClientInterface;
-use Carbon\Carbon;
 use DateTime;
 use DateTimeInterface;
 use Illuminate\Console\Command;
@@ -43,10 +42,17 @@ class DownloadStocksCommand extends Command
 
     public function handle(): int
     {
-        $this->date = date_create($this->argument('date'));
-        if (null === $this->date) {
+        $inputDate = $this->argument('date');
+        if (null !== $inputDate && DateTime::createFromFormat('Y-m-d', $inputDate) == false) {
+            //check for valid date format
+            $this->info('Please provide valid data format 2022-01-05.');
+            return 1;
+        } elseif (null === $inputDate) {
+            //if not date specified will use current date
             $this->date = date_create();
             $this->info('No date were specified, using today\'s day: ' . $this->date->format('Y-m-d'));
+        } else {
+            $this->date = date_create($inputDate);
         }
 
         try {
@@ -58,9 +64,12 @@ class DownloadStocksCommand extends Command
             //just continue
         }
 
+        $this->info('Downloading stocks...');
+
         //will throw exception, if can't download file
         $this->apiClient->downloadStocks($this->date->format('Y-m-d'));
 
+        $this->info('Download complete, starting processing.');
         $stockPrices = [];
         $this->processFile(
             static function (array $row) use (&$stockPrices) {
@@ -71,6 +80,7 @@ class DownloadStocksCommand extends Command
 
         //when processed save date
         $this->stockRepository->createDate($this->date);
+        $this->info('Processing complete.');
 
         unlink(self::FILE_NAME);
 
