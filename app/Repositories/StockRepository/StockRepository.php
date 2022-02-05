@@ -8,7 +8,6 @@ use App\Models\Date;
 use App\Models\Stock;
 use App\Models\StockPrice;
 use DateTimeInterface;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class StockRepository implements StockRepositoryInterface
 {

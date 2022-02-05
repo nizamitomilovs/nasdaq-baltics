@@ -17,7 +17,7 @@ use RuntimeException;
 
 class DownloadStocksCommand extends Command
 {
-    private const FILE_NAME = 'storage/stocks.xlsx';
+    public const FILE_NAME = 'storage/stocks.xlsx';
     /**
      * @var string
      */
@@ -80,13 +80,17 @@ class DownloadStocksCommand extends Command
     private function processFile(callable $operation): void
     {
         if (!$this->xlsReader->canRead(self::FILE_NAME)) {
-            throw new RuntimeException('Cannot read the input file');
+            throw new RuntimeException('Cannot read the input file.');
         }
+
         $book = $this->xlsReader->load(self::FILE_NAME);
         $sheet = $book->getActiveSheet();
 
-        $this->checkAndSaveStockNames($sheet);
+        if (3 > $sheet->getHighestRow()) {
+            throw new RuntimeException('Didn\'t find any stocks in the file.');
+        }
 
+        $this->checkAndSaveStockNames($sheet);
 
         for ($row = 2; $row <= $sheet->getHighestRow(); $row++) {
             $operation($this->convertStockPriceRows($sheet, $row));
@@ -109,14 +113,14 @@ class DownloadStocksCommand extends Command
         if (count($savedStocks) !== count($stockTickers)) {
             foreach ($stocks as $stockTicker => $stockName) {
                 if (false === array_search($stockTicker, array_column($savedStocks, 'ticker'))) {
-                   $this->stockRepository->createStock($stockTicker, $stockName);
+                    $this->stockRepository->createStock($stockTicker, $stockName);
                 }
             }
         }
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, string|DateTimeInterface>
      */
     private function convertStockPriceRows(Worksheet $sheet, int $row): array
     {

@@ -22,9 +22,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
 
-
         $this->app->bind(ApiClientInterface::class, function ($app) {
             return new ApiClient(
+                env('NASDAQ_URL'),
                 $app->make(GuzzleClient::class),
             );
         });
